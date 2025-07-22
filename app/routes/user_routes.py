@@ -1,55 +1,58 @@
-from flask import Blueprint, request, jsonify, abort
+from flask import Blueprint, abort, make_response, request, Response
 from app.models.user import User
 from app.db import db
-from app.routes.route_utilities import validate_model  # helper to check if model instance exists
+from app.routes.route_utilities import validate_model
 
-bp = Blueprint('users', __name__, url_prefix='/users')
+bp = Blueprint("users_bp", __name__, url_prefix="/users")
 
-
-@bp.route('', methods=['GET'])
+@bp.get("")
 def get_users():
     users = User.query.all()
-    return jsonify([user.to_dict() for user in users])
+    users_response = [user.to_dict() for user in users]
+    return users_response
 
-
-@bp.route('/<int:id>', methods=['GET'])
+@bp.get("/<int:id>")
 def get_user(id):
     user = validate_model(User, id)
-    return jsonify(user.to_dict())
+    return user.to_dict()
 
-
-@bp.route('', methods=['POST'])
+@bp.post("")
 def create_user():
     data = request.get_json()
-    if not data or 'name' not in data or 'email' not in data:
-        abort(400, 'Name and email are required.')
+    if not data or "name" not in data or "email" not in data:
+        return make_response({"details": "Name and email are required."}, 400)
 
-    # Check if email already exists?
-    if User.query.filter_by(email=data['email']).first():
-        abort(409, 'Email already exists.')
+    if User.query.filter_by(email=data["email"]).first():
+        return make_response({"details": "Email already exists."}, 409)
 
-    user = User(name=data['name'], email=data['email'])
+    user = User(name=data["name"], email=data["email"])
     db.session.add(user)
     db.session.commit()
-    return jsonify(user.to_dict()), 201
 
+    return {"user": user.to_dict()}, 201
 
-@bp.route('/<int:id>', methods=['PUT'])
+@bp.put("/<int:id>")
 def update_user(id):
     user = validate_model(User, id)
     data = request.get_json()
     if not data:
-        abort(400, 'Request body is empty.')
+        return make_response({"details": "Request body is empty."}, 400)
 
-    user.name = data.get('name', user.name)
-    user.email = data.get('email', user.email)
+    new_email = data.get("email")
+    if new_email and new_email != user.email:
+        if User.query.filter_by(email=new_email).first():
+            return make_response({"details": "Email already exists."}, 409)
+
+    user.name = data.get("name", user.name)
+    user.email = new_email or user.email
     db.session.commit()
-    return jsonify(user.to_dict())
 
+    return Response(status=204, mimetype="application/json")
 
-@bp.route('/<int:id>', methods=['DELETE'])
+@bp.delete("/<int:id>")
 def delete_user(id):
     user = validate_model(User, id)
     db.session.delete(user)
     db.session.commit()
-    return '', 204
+
+    return Response(status=204, mimetype="application/json")
