@@ -3,13 +3,6 @@ from flask_cors import CORS
 from .db import db, migrate
 import os
 
-# Import models, blueprints, and anything else needed to set up the app or database
-from .models import plant, user, user_plant, watering_record, watering_schedule
-from app.routes.user_routes import bp as users_bp
-from app.routes.user_plant_routes import bp as user_plants_bp
-from app.routes.plant_routes import bp as plants_bp
-from app.routes.cronjob_routes import bp as cronjobs_bp
-
 def create_app(config=None):
     app = Flask(__name__)
 
@@ -23,7 +16,19 @@ def create_app(config=None):
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # Register Blueprints
+    # Import models here to avoid circular imports
+    from .models.plant import Plant
+    from .models.user import User
+    from .models.user_plant import UserPlant
+    from .models.watering_record import WateringRecord
+    from .models.watering_schedule import WateringSchedule
+
+    # Import and register blueprints here as well
+    from app.routes.user_routes import bp as users_bp
+    from app.routes.user_plant_routes import bp as user_plants_bp
+    from app.routes.plant_routes import bp as plants_bp
+    from app.routes.cronjob_routes import bp as cronjobs_bp
+
     app.register_blueprint(users_bp)
     app.register_blueprint(user_plants_bp)
     app.register_blueprint(plants_bp)
