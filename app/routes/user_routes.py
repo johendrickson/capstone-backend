@@ -20,24 +20,22 @@ def get_user(id):
 @bp.post("")
 def create_user():
     data = request.get_json()
-    if not data or "name" not in data or "email" not in data or "location_name" not in data:
-        return make_response({"details": "Name, email, and location_name are required."}, 400)
+    if not data or "name" not in data or "email" not in data or "zip_code" not in data:
+        return make_response({"details": "Name, email, and zip_code are required."}, 400)
 
     if User.query.filter_by(email=data["email"]).first():
         return make_response({"details": "Email already exists."}, 409)
 
-    # Geocode location_name to get lat/lon
+    # Validate zip code (optional): geocode will throw if invalid
     try:
-        latitude, longitude = geocode_location(data["location_name"])
+        latitude, longitude = geocode_location(data["zip_code"])
     except Exception as e:
-        return make_response({"details": f"Invalid location_name: {str(e)}"}, 400)
+        return make_response({"details": f"Invalid zip_code: {str(e)}"}, 400)
 
     user = User(
         name=data["name"],
         email=data["email"],
-        location_name=data["location_name"],
-        latitude=latitude,
-        longitude=longitude,
+        zip_code=data["zip_code"],
     )
     db.session.add(user)
     db.session.commit()
@@ -59,17 +57,14 @@ def update_user(id):
     user.name = data.get("name", user.name)
     user.email = new_email or user.email
 
-    # If location_name updated, geocode again
-    new_location_name = data.get("location_name")
-    if new_location_name and new_location_name != user.location_name:
+    new_zip = data.get("zip_code")
+    if new_zip and new_zip != user.zip_code:
         try:
-            latitude, longitude = geocode_location(new_location_name)
+            latitude, longitude = geocode_location(new_zip)
         except Exception as e:
-            return make_response({"details": f"Invalid location_name: {str(e)}"}, 400)
-
-        user.location_name = new_location_name
-        user.latitude = latitude
-        user.longitude = longitude
+            return make_response({"details": f"Invalid zip_code: {str(e)}"}, 400)
+        user.zip_code = new_zip
+        # Optionally: store lat/lon somewhere or use on-the-fly geocoding
 
     db.session.commit()
 

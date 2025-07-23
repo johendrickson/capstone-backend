@@ -8,27 +8,21 @@ class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
-    location_name: Mapped[str] = mapped_column(nullable=False)  # Required location name
-    latitude: Mapped[float] = mapped_column(nullable=True)
-    longitude: Mapped[float] = mapped_column(nullable=True)
+    zip_code: Mapped[str] = mapped_column(nullable=False)  # required zip code as string
 
     plants: Mapped[list["UserPlant"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
-    def __init__(self, name: str, email: str, location_name: str, latitude: float = None, longitude: float = None):
+    def __init__(self, name: str, email: str, zip_code: str):
         self.name = name
         self.email = email
-        self.location_name = location_name
-        self.latitude = latitude
-        self.longitude = longitude
+        self.zip_code = zip_code
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
             "email": self.email,
-            "location_name": self.location_name,
-            "latitude": self.latitude,
-            "longitude": self.longitude,
+            "zip_code": self.zip_code,
         }
 
     @classmethod
@@ -36,7 +30,5 @@ class User(db.Model):
         return cls(
             name=data["name"],
             email=data["email"],
-            location_name=data["location_name"],  # required
-            latitude=data.get("latitude"),
-            longitude=data.get("longitude"),
+            zip_code=data["zip_code"],  # required
         )
