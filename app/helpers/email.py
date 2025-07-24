@@ -1,6 +1,9 @@
 import smtplib
 from email.message import EmailMessage
 import os
+print("EMAIL_USER:", os.environ.get("EMAIL_USER"))
+print("EMAIL_PASSWORD:", os.environ.get("EMAIL_PASSWORD"))
+
 
 def send_email(to_email: str, subject: str, body: str):
     """Send an email using SMTP with a Gmail account."""

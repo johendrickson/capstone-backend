@@ -1,14 +1,5 @@
 import os
-from datetime import date, timedelta
-from app.helpers.weather_api import fetch_forecast_data
-from app.helpers.geocode import geocode_location
-from app.models.daily_weather import DailyWeather
-from app.db import db
-from app.models.user import User
-from app.helpers.email import send_email
-from app import create_app
-
-app = create_app()
+import requests
 
 def detect_heat_wave(today_temp, yesterday_temp):
     if today_temp is None or yesterday_temp is None:
@@ -42,77 +33,66 @@ def detect_dry_heat(forecast_temps, forecast_rain):
 
     return no_rain_days >= 3 and (total_temp / no_rain_days) >= 80
 
+def fetch_forecast_data(lat, lon):
+    api_key = os.environ.get("OPENWEATHER_API_KEY")  # fixed variable name
+    if not api_key:
+        raise ValueError("OPENWEATHER_API_KEY environment variable is not set")
+
+    url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&units=imperial&appid={api_key}"
+
+    response = requests.get(url)
+    response.raise_for_status()  # raise error if response bad
+    data = response.json()
+
+    today = data["list"][0]
+    temps = [entry["main"]["temp"] for entry in data["list"][:40]]
+    rain_flags = [
+        entry.get("rain", {}).get("3h", 0) > 0 for entry in data["list"][:40]
+    ]
+
+    return {
+        "today": {
+            "temp": today["main"]["temp"],
+            "min": today["main"]["temp_min"],
+            "max": today["main"]["temp_max"],
+            "rain": today.get("rain", {}).get("3h", 0),
+            "description": today["weather"][0]["description"],
+        },
+        "next_5_days": {
+            "temps": temps,
+            "rain_flags": rain_flags,
+        },
+    }
+
 def get_weather_alerts_for_user(user):
-    # Use lat/lon if available on user model, else geocode using ZIP code
-    if hasattr(user, "latitude") and hasattr(user, "longitude") and user.latitude and user.longitude:
-        lat, lon = user.latitude, user.longitude
-    else:
-        lat, lon = geocode_location(user.zip_code)
+    from app.helpers.geocode import geocode_location  # imported here to avoid circular imports
+    from app.models.daily_weather import DailyWeather
+    from app.db import db
+    from datetime import date, timedelta
 
-    forecast_data = fetch_forecast_data(lat, lon)
+    lat, lon = geocode_location(user.zip_code)
+    forecast = fetch_forecast_data(lat, lon)
 
-    today_temp = forecast_data["today"]["temp"]
-    today_min = forecast_data["today"]["min"]
-    today_max = forecast_data["today"]["max"]
-    today_rain = forecast_data["today"]["rain"]
-    today_description = forecast_data["today"]["description"]
+    today = date.today()
+    yesterday = today - timedelta(days=1)
 
-    forecast_temps = forecast_data["next_5_days"]["temps"]
-    forecast_rain = forecast_data["next_5_days"]["rain_flags"]
-
-    yesterday = date.today() - timedelta(days=1)
-    yesterday_weather = DailyWeather.query.filter_by(date=yesterday, latitude=lat, longitude=lon).first()
-    yesterday_temp = yesterday_weather.max_temp if yesterday_weather else None
+    yesterday_data = DailyWeather.query.filter_by(
+    latitude=user.latitude,
+    longitude=user.longitude,
+    date=yesterday
+    ).first()
+    today_temp = forecast["today"]["temp"]
+    yesterday_temp = yesterday_data.high if yesterday_data else None
 
     alerts = []
 
-    if today_temp is not None and detect_frost(today_temp):
-        alerts.append("Frost expected today.")
-
-    if yesterday_temp is not None:
-        if today_temp is not None and detect_cold_snap(today_temp, yesterday_temp):
-            alerts.append("Cold snap warning!")
-        if today_temp is not None and detect_heat_wave(today_temp, yesterday_temp):
-            alerts.append("Heat wave incoming.")
-
-    if detect_dry_heat(forecast_temps, forecast_rain):
-        alerts.append("Dry heat spell expected.")
-
-    # Save today's weather if not already saved
-    existing = DailyWeather.query.filter_by(date=date.today(), latitude=lat, longitude=lon).first()
-    if not existing:
-        today_weather = DailyWeather(
-            date=date.today(),
-            latitude=lat,
-            longitude=lon,
-            min_temp=today_min if today_min is not None else 0,
-            max_temp=today_max if today_max is not None else 0,
-            precipitation=today_rain if today_rain is not None else 0,
-            did_rain=today_rain > 0 if today_rain is not None else False,
-            weather_description=today_description,
-        )
-        db.session.add(today_weather)
-        db.session.commit()
+    if detect_heat_wave(today_temp, yesterday_temp):
+        alerts.append("A heat wave is forecasted for today.")
+    if detect_cold_snap(today_temp, yesterday_temp):
+        alerts.append("A cold snap is expected today.")
+    if detect_frost(today_temp):
+        alerts.append("There is a risk of frost today.")
+    if detect_dry_heat(forecast["next_5_days"]["temps"], forecast["next_5_days"]["rain_flags"]):
+        alerts.append("A dry heat wave is expected over the next few days.")
 
     return alerts
-
-def run_weather_alerts_for_all_users():
-    with app.app_context():
-        users = User.query.all()
-        for user in users:
-            alerts = get_weather_alerts_for_user(user)
-            if alerts:
-                alert_message = "\n".join(alerts)
-                subject = "Plant Pal: Weather Alert for Your Area"
-                body = (
-                    f"Hello {user.name},\n\n"
-                    f"The following weather alerts are active for your area:\n\n"
-                    f"{alert_message}\n\n"
-                    "Please take appropriate action to protect your plants.\n\n"
-                    "- Plant Pal"
-                )
-                send_email(
-                    to_email=user.email,
-                    subject=subject,
-                    body=body
-                )
