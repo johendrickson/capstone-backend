@@ -1,5 +1,6 @@
 import os
 import requests
+from flask import make_response
 
 def geocode_location(zip_code: str):
     """Convert a zip code string to latitude and longitude using LocationIQ API."""
@@ -25,3 +26,10 @@ def geocode_location(zip_code: str):
     lat = float(data[0]["lat"])
     lon = float(data[0]["lon"])
     return lat, lon
+
+
+def get_coordinates_or_error(zip_code):
+    try:
+        return geocode_location(zip_code)
+    except Exception as e:
+        return make_response({"details": f"Invalid zip_code: {str(e)}"}, 400)

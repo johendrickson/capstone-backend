@@ -2,7 +2,7 @@ from flask import Blueprint, abort, make_response, request, Response
 from app.models.user import User
 from app.db import db
 from app.routes.route_utilities import validate_model
-from app.helpers.geocode import geocode_location
+from app.helpers.geocode import get_coordinates_or_error
 
 bp = Blueprint("users_bp", __name__, url_prefix="/users")
 
@@ -26,16 +26,18 @@ def create_user():
     if User.query.filter_by(email=data["email"]).first():
         return make_response({"details": "Email already exists."}, 409)
 
-    # Validate zip code (optional): geocode will throw if invalid
-    try:
-        latitude, longitude = geocode_location(data["zip_code"])
-    except Exception as e:
-        return make_response({"details": f"Invalid zip_code: {str(e)}"}, 400)
+    coords = get_coordinates_or_error(data["zip_code"])
+    if isinstance(coords, Response):
+        return coords
+
+    latitude, longitude = coords
 
     user = User(
-        name=data["name"],
-        email=data["email"],
-        zip_code=data["zip_code"],
+        name=data.get("name"),
+        email=data.get("email"),
+        zip_code=data.get("zip_code"),
+        latitude=latitude,
+        longitude=longitude
     )
     db.session.add(user)
     db.session.commit()
@@ -59,16 +61,15 @@ def update_user(id):
 
     new_zip = data.get("zip_code")
     if new_zip and new_zip != user.zip_code:
-        try:
-            latitude, longitude = geocode_location(new_zip)
-        except Exception as e:
-            return make_response({"details": f"Invalid zip_code: {str(e)}"}, 400)
+        coords = get_coordinates_or_error(new_zip)
+        if isinstance(coords, Response):
+            return coords
+        user.latitude, user.longitude = coords
         user.zip_code = new_zip
-        # Optionally: store lat/lon somewhere or use on-the-fly geocoding
 
     db.session.commit()
 
-    return Response(status=204, mimetype="application/json")
+    return {"user": user.to_dict()}, 200
 
 @bp.delete("/<int:id>")
 def delete_user(id):
