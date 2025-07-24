@@ -1,6 +1,8 @@
 import os
 import requests
 from flask import make_response, Response
+from typing import Union, Tuple
+
 
 def geocode_location(zip_code: str):
     """Convert a zip code string to latitude and longitude using LocationIQ API."""
@@ -28,7 +30,7 @@ def geocode_location(zip_code: str):
     return lat, lon
 
 
-def get_coordinates_or_error(zip_code) -> tuple[float, float] | Response:
+def get_coordinates_or_error(zip_code) -> Union[Tuple[float, float], Response]:
     """
     Wrapper that attempts to get coordinates from a zip code.
     Returns a (lat, lon) tuple on success,

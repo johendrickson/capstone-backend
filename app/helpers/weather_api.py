@@ -1,20 +1,19 @@
 import requests
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.models.daily_weather import DailyWeather
 
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
 def fetch_forecast_data(lat, lon):
     """
-    Gets current and 5-day forecast data from OpenWeather API for a location.
-    Returns detailed info including today's min/max temps and precipitation.
+    Fetches 5-day weather forecast in 3-hour intervals from OpenWeather free API.
+    Processes data to extract today's min/max temps, rain, and next 5 days daily temps and rain flags.
     """
-    url = "https://api.openweathermap.org/data/2.5/onecall"
+    url = "http://api.openweathermap.org/data/2.5/forecast"
     params = {
         "lat": lat,
         "lon": lon,
-        "exclude": "minutely,hourly,alerts",
         "units": "imperial",
         "appid": OPENWEATHER_API_KEY
     }
@@ -23,28 +22,65 @@ def fetch_forecast_data(lat, lon):
     response.raise_for_status()
     data = response.json()
 
-    today_data = data["daily"][0]
+    forecast_list = data.get("list", [])
 
-    today_temp = today_data["temp"]["day"]
-    today_min = today_data["temp"]["min"]
-    today_max = today_data["temp"]["max"]
-    today_description = today_data["weather"][0]["description"]
-    today_rain = today_data.get("rain", 0)  # rain volume for today, 0 if none
+    today = datetime.utcnow().date()
 
-    forecast_temps = [day["temp"]["day"] for day in data["daily"][:5]]
-    forecast_rain = [("rain" in day) for day in data["daily"][:5]]
+    # Group temps and rain flags by date
+    daily_temps = {}
+    daily_rain = {}
+
+    for forecast in forecast_list:
+        dt_txt = forecast["dt_txt"]  # e.g., '2025-07-24 15:00:00'
+        dt = datetime.strptime(dt_txt, "%Y-%m-%d %H:%M:%S")
+        date_key = dt.date()
+
+        temp = forecast["main"]["temp"]
+        rain = forecast.get("rain", {}).get("3h", 0)
+
+        daily_temps.setdefault(date_key, []).append(temp)
+        if rain > 0:
+            daily_rain[date_key] = True
+        else:
+            # Set False only if not previously set True
+            daily_rain.setdefault(date_key, False)
+
+    # Today's data
+    today_temps = daily_temps.get(today, [])
+    today_min = min(today_temps) if today_temps else None
+    today_max = max(today_temps) if today_temps else None
+    today_avg = sum(today_temps) / len(today_temps) if today_temps else None
+    today_rain = daily_rain.get(today, False)
+
+    # Description approximation: use first forecast description for today if exists
+    today_description = ""
+    for forecast in forecast_list:
+        dt = datetime.strptime(forecast["dt_txt"], "%Y-%m-%d %H:%M:%S")
+        if dt.date() == today:
+            today_description = forecast["weather"][0]["description"]
+            break
+
+    # Next 5 days data starting tomorrow
+    next_5_days = []
+    next_5_rain = []
+    for i in range(1, 6):
+        day = today + timedelta(days=i)
+        temps = daily_temps.get(day, [])
+        avg_temp = sum(temps) / len(temps) if temps else None
+        next_5_days.append(avg_temp)
+        next_5_rain.append(daily_rain.get(day, False))
 
     return {
         "today": {
-            "temp": today_temp,
+            "temp": today_avg,
             "min": today_min,
             "max": today_max,
             "description": today_description,
             "rain": today_rain
         },
         "next_5_days": {
-            "temps": forecast_temps,
-            "rain_flags": forecast_rain
+            "temps": next_5_days,
+            "rain_flags": next_5_rain
         }
     }
 
@@ -60,7 +96,6 @@ def store_today_weather(user, db_session):
     weather_data = fetch_forecast_data(lat, lon)
     today = datetime.utcnow().date()
 
-    # Check for existing record for this date and location
     existing = DailyWeather.query.filter_by(date=today, latitude=lat, longitude=lon).first()
     if existing:
         return  # Already stored today's data
@@ -71,10 +106,10 @@ def store_today_weather(user, db_session):
         date=today,
         latitude=lat,
         longitude=lon,
-        min_temp=today_data.get("min", today_data["temp"]),
-        max_temp=today_data.get("max", today_data["temp"]),
-        precipitation=today_data.get("rain", 0),
-        did_rain=today_data.get("rain", 0) > 0,
+        min_temp=today_data.get("min"),
+        max_temp=today_data.get("max"),
+        precipitation=1 if today_data.get("rain") else 0,
+        did_rain=today_data.get("rain"),
         weather_description=today_data.get("description", ""),
     )
 

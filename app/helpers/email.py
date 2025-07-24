@@ -21,7 +21,8 @@ def send_email(to_email: str, subject: str, body: str):
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
             smtp.login(email_user, email_password)
             smtp.send_message(msg)
+        print(f"Email sent to {to_email}")
         return True
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"Failed to send email to {to_email}: {e}")
         return False
