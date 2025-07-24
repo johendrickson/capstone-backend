@@ -43,6 +43,7 @@ def create_app(config=None):
     from .models.user_plant import UserPlant
     from .models.watering_record import WateringRecord
     from .models.watering_schedule import WateringSchedule
+    from .models.daily_weather import DailyWeather
 
     # Import and register blueprints here as well
     from app.routes.user_routes import bp as users_bp
