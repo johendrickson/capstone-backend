@@ -25,6 +25,7 @@ jobs:
 
       - name: Run watering reminders script
         env:
+          PYTHONPATH: ${{ github.workspace }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
