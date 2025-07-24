@@ -5,25 +5,6 @@ from app.models.daily_weather import DailyWeather
 
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
-def get_coordinates(zip_code):
-    """
-    Gets latitude and longitude from a ZIP code using OpenWeather's geo API.
-    """
-    url = "http://api.openweathermap.org/geo/1.0/zip"
-    params = {
-        "zip": f"{zip_code},US",
-        "appid": OPENWEATHER_API_KEY
-    }
-
-    response = requests.get(url, params=params)
-    response.raise_for_status()
-    data = response.json()
-
-    if "lat" not in data or "lon" not in data:
-        raise ValueError(f"Could not geocode ZIP code: {zip_code}")
-
-    return data["lat"], data["lon"]
-
 def fetch_forecast_data(lat, lon):
     """
     Gets current and 5-day forecast data from OpenWeather API for a location.
@@ -69,14 +50,17 @@ def fetch_forecast_data(lat, lon):
 
 def store_today_weather(user, db_session):
     """
-    Fetches today's weather and stores it in the DailyWeather table.
-    Avoids duplicate entries for the same date and location.
+    Fetch today's weather and store it in the DailyWeather table,
+    using the user's stored latitude and longitude.
     """
-    lat, lon = get_coordinates(user.zip_code)
+    if user.latitude is None or user.longitude is None:
+        raise ValueError("User does not have latitude and longitude set")
+
+    lat, lon = user.latitude, user.longitude
     weather_data = fetch_forecast_data(lat, lon)
     today = datetime.utcnow().date()
 
-    # Check if entry already exists for today and location
+    # Check for existing record for this date and location
     existing = DailyWeather.query.filter_by(date=today, latitude=lat, longitude=lon).first()
     if existing:
         return  # Already stored today's data

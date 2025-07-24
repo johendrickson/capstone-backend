@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, make_response, request, Response
+from flask import Blueprint, make_response, request, Response
 from app.models.user import User
 from app.db import db
 from app.routes.route_utilities import validate_model
