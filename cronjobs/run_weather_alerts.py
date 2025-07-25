@@ -9,26 +9,19 @@ app = create_app()
 with app.app_context():
     users = User.query.all()
 
-    # for user in users:
-        # alerts = get_weather_alerts_for_user(user)
-        # alerts = ["This is a test alert to verify email sending."]
-        # if alerts:
-        #     message = "\n".join(alerts)
-        #     sent = send_email(
-        #         to=user.email,
-        #         subject="Weather Alert for Your Plants 🌿",
-        #         body=message
-        #     )
-        #     print(f"Email sent to {user.email}: {sent}", flush=True)
-
-
     print("Starting sending emails", flush=True)
     for user in users:
         print(f"Sending to {user.email}", flush=True)
+
+        # Use test alert here for now:
+        alerts = ["This is a test alert to verify email sending."]
+        message = "\n".join(alerts)
+
         sent = send_email(
             to=user.email,
             subject="Weather Alert for Your Plants 🌿",
             body=message
         )
-    print(f"Email sent to {user.email}: {sent}", flush=True)
-print("Finished sending emails", flush=True)
+        print(f"Email sent to {user.email}: {sent}", flush=True)
+
+    print("Finished sending emails", flush=True)
