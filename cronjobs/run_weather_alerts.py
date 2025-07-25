@@ -1,7 +1,7 @@
 from app import create_app
 from app.models.user import User
 from app.helpers.email import send_email
-from cronjobs.weather_alerts import get_weather_alerts_for_user
+from cronjobs.store_daily_weather import fetch_and_store_daily_weather
 from app.db import db
 
 print("creating app context")
