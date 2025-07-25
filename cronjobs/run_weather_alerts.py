@@ -19,4 +19,4 @@ with app.app_context():
                 subject="Weather Alert for Your Plants 🌿",
                 body=message
             )
-            print(f"Email sent to {user.email}: {sent}")
+            print(f"Email sent to {user.email}: {sent}", flush=True)
