@@ -10,7 +10,8 @@ with app.app_context():
     users = User.query.all()
 
     for user in users:
-        alerts = get_weather_alerts_for_user(user)
+        # alerts = get_weather_alerts_for_user(user)
+        alerts = ["This is a test alert to verify email sending."]
         if alerts:
             message = "\n".join(alerts)
             send_email(
