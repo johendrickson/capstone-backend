@@ -14,7 +14,7 @@ with app.app_context():
         if reminders:
             plant_list = ", ".join(reminders)
             send_email(
-                to=user.email,
+                to_email=user.email,
                 subject="Watering Reminder 💧",
                 body=f"Don't forget to water your plants today: {plant_list}"
             )

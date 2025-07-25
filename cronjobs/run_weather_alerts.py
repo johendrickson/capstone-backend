@@ -4,9 +4,13 @@ from app.helpers.email import send_email
 from cronjobs.weather_alerts import get_weather_alerts_for_user
 from app.db import db
 
+print("creating app context")
+
 app = create_app()
+print("created app context")
 
 with app.app_context():
+    print("getting users from database")
     users = User.query.all()
 
     print("Starting sending emails", flush=True)
