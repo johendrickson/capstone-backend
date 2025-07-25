@@ -14,14 +14,20 @@ DB_PORT = os.environ.get('DB_PORT')
 DB_NAME = os.environ.get('DB_NAME')
 DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=require"
 
+print(DATABASE_URL)
+print("app __init_ file read")
+
 def create_app(config=None):
+    print("app insite create_app")
     app = Flask(__name__)
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
     # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 
+    print("app creating engine")
     engine = create_engine(DATABASE_URL)
+    print("app created engine")
 
     try:
         with engine.connect() as connection:
