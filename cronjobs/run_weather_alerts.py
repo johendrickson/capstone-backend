@@ -18,7 +18,7 @@ with app.app_context():
         message = "\n".join(alerts)
 
         sent = send_email(
-            to=user.email,
+            to_email=user.email,
             subject="Weather Alert for Your Plants 🌿",
             body=message
         )
