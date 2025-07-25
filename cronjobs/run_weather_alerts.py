@@ -14,7 +14,7 @@ with app.app_context():
         alerts = ["This is a test alert to verify email sending."]
         if alerts:
             message = "\n".join(alerts)
-            send_email(
+            sent = send_email(
                 to=user.email,
                 subject="Weather Alert for Your Plants 🌿",
                 body=message
