@@ -55,12 +55,10 @@ def create_app(config=None):
     from app.routes.user_routes import bp as users_bp
     from app.routes.user_plant_routes import bp as user_plants_bp
     from app.routes.plant_routes import bp as plants_bp
-    from app.routes.cronjob_routes import bp as cronjobs_bp
 
     app.register_blueprint(users_bp)
     app.register_blueprint(user_plants_bp)
     app.register_blueprint(plants_bp)
-    app.register_blueprint(cronjobs_bp)
 
     CORS(app)
     return app
