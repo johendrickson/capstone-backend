@@ -1,7 +1,7 @@
 """Setting up db
 
 Revision ID: bbe49aa1c275
-Revises: 
+Revises:
 Create Date: 2025-07-23 19:35:55.476890
 
 """

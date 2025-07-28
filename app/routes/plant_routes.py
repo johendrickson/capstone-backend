@@ -32,7 +32,7 @@ def create_plant():
         preferred_soil_conditions=request_body.get("preferred_soil_conditions"),
         propagation_methods=request_body.get("propagation_methods"),
         edible_parts=request_body.get("edible_parts"),
-        is_plant_safe=request_body.get("is_plant_safe"),
+        is_pet_safe=request_body.get("is_pet_safe"),
     )
 
     db.session.add(new_plant)
@@ -55,7 +55,7 @@ def update_plant(id):
     plant.preferred_soil_conditions = request_body.get("preferred_soil_conditions", plant.preferred_soil_conditions)
     plant.propagation_methods = request_body.get("propagation_methods", plant.propagation_methods)
     plant.edible_parts = request_body.get("edible_parts", plant.edible_parts)
-    plant.is_plant_safe = request_body.get("is_plant_safe", plant.is_plant_safe)
+    plant.is_pet_safe = request_body.get("is_pet_safe", plant.is_pet_safe)
 
     db.session.commit()
 
