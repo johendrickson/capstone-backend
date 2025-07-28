@@ -1,7 +1,13 @@
+import os
+import json
 from flask import Blueprint, abort, make_response, request, Response
+
+from google import genai
 from app.models.plant import Plant
 from app.db import db
 from app.routes.route_utilities import validate_model
+
+
 
 bp = Blueprint("plants_bp", __name__, url_prefix="/plants")
 
@@ -44,7 +50,6 @@ def create_plant():
     db.session.commit()
 
     return {"plant": new_plant.to_dict()}, 201
-
 
 @bp.put("/<int:id>")
 def update_plant(id):
