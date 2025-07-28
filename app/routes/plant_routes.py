@@ -5,6 +5,11 @@ from app.routes.route_utilities import validate_model
 
 bp = Blueprint("plants_bp", __name__, url_prefix="/plants")
 
+@bp.get("/<int:id>")
+def get_plant(id):
+    plant = validate_model(Plant, id)
+    return {"plant": plant.to_dict()}
+
 @bp.get("")
 def get_plants():
     query = db.select(Plant)
