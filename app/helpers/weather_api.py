@@ -77,9 +77,9 @@ def get_weather_alerts_for_user(user):
     yesterday = today - timedelta(days=1)
 
     yesterday_data = DailyWeather.query.filter_by(
-    latitude=user.latitude,
-    longitude=user.longitude,
-    date=yesterday
+        latitude=user.latitude,
+        longitude=user.longitude,
+        date=yesterday
     ).first()
     today_temp = forecast["today"]["temp"]
     yesterday_temp = yesterday_data.high if yesterday_data else None
@@ -87,12 +87,27 @@ def get_weather_alerts_for_user(user):
     alerts = []
 
     if detect_heat_wave(today_temp, yesterday_temp):
-        alerts.append("A heat wave is forecasted for today.")
+        alerts.append(
+            "Heads up! It's going to be unusually hot today — a heat wave is moving through your area. "
+            "Be sure to check on your sun-sensitive plants and water them early to avoid heat stress."
+        )
+
     if detect_cold_snap(today_temp, yesterday_temp):
-        alerts.append("A cold snap is expected today.")
+        alerts.append(
+            "Brrr! ❄️ A cold snap is hitting today. If you have any tropical or frost-sensitive plants outside, "
+            "you might want to bring them in or cover them up to keep them cozy."
+        )
+
     if detect_frost(today_temp):
-        alerts.append("There is a risk of frost today.")
+        alerts.append(
+            "It’s frosty out there! Temperatures are dipping low enough that frost could form. "
+            "Protect your plants by covering them or moving them indoors if you can."
+        )
+
     if detect_dry_heat(forecast["next_5_days"]["temps"], forecast["next_5_days"]["rain_flags"]):
-        alerts.append("A dry heat wave is expected over the next few days.")
+        alerts.append(
+            "A stretch of dry, hot weather is ahead — no rain in sight and high temps. "
+            "Make sure your plants stay hydrated!"
+        )
 
     return alerts
