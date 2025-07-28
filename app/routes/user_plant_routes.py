@@ -32,9 +32,15 @@ def create_user_plant():
 
 @bp.get("")
 def get_all_user_plants():
-    user_plants = db.session.query(UserPlant).all()
+    user_id = request.args.get("user_id")
+
+    if user_id:
+        user_plants = db.session.query(UserPlant).filter_by(user_id=user_id).all()
+    else:
+        user_plants = db.session.query(UserPlant).all()
+
     user_plants_response = [up.to_dict() for up in user_plants]
-    return user_plants_response
+    return {"user_plants": user_plants_response}
 
 @bp.get("/<int:user_plant_id>")
 def get_one_user_plant(user_plant_id):

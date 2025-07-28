@@ -10,12 +10,12 @@ bp = Blueprint("users_bp", __name__, url_prefix="/users")
 def get_users():
     users = User.query.all()
     users_response = [user.to_dict() for user in users]
-    return users_response
+    return {"users": users_response}
 
 @bp.get("/<int:id>")
 def get_user(id):
     user = validate_model(User, id)
-    return user.to_dict()
+    return {"user": user.to_dict()}
 
 @bp.post("")
 def create_user():

@@ -12,10 +12,13 @@ def get_plants():
     plants_response = [plant.to_dict() for plant in plants]
     return plants_response
 
-@bp.get("/<int:id>")
-def get_plant(id):
-    plant = validate_model(Plant, id)
-    return {"plant": plant.to_dict()}
+@bp.get("")
+def get_plants():
+    query = db.select(Plant)
+    plants = db.session.scalars(query).all()
+    plants_response = [plant.to_dict() for plant in plants]
+    return {"plants": plants_response}
+
 
 @bp.post("")
 def create_plant():
