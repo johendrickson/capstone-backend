@@ -22,8 +22,13 @@ def create_plant():
     request_body = request.get_json()
 
     required_fields = ["common_name", "scientific_name"]
-    if not request_body or any(field not in request_body for field in required_fields):
-        return make_response({"details": "Missing required fields"}, 400)
+    missing_fields = [field for field in required_fields if field not in request_body]
+
+    if not request_body or missing_fields:
+        return make_response(
+            {"details": f"Missing required field(s): {', '.join(missing_fields)}"},
+            400
+        )
 
     new_plant = Plant(
         common_name=request_body["common_name"],
@@ -39,6 +44,7 @@ def create_plant():
     db.session.commit()
 
     return {"plant": new_plant.to_dict()}, 201
+
 
 @bp.put("/<int:id>")
 def update_plant(id):
