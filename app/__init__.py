@@ -15,10 +15,10 @@ DB_NAME = os.environ.get('DB_NAME')
 DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=require"
 
 print(DATABASE_URL)
-print("app __init_ file read")
+print("app __init__ file read")
 
 def create_app(config=None):
-    print("app insite create_app")
+    print("app inside create_app")
     app = Flask(__name__)
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -44,6 +44,7 @@ def create_app(config=None):
     migrate.init_app(app, db)
 
     # Import models here to avoid circular imports
+    print("app importing models")
     from .models.plant import Plant
     from .models.user import User
     from .models.user_plant import UserPlant
@@ -52,10 +53,12 @@ def create_app(config=None):
     from .models.daily_weather import DailyWeather
 
     # Import and register blueprints here as well
+    print("app importing blueprints/routes")
     from app.routes.user_routes import bp as users_bp
     from app.routes.user_plant_routes import bp as user_plants_bp
     from app.routes.plant_routes import bp as plants_bp
 
+    print("app registering blueprints")
     app.register_blueprint(users_bp)
     app.register_blueprint(user_plants_bp)
     app.register_blueprint(plants_bp)

@@ -13,8 +13,16 @@ class UserPlant(db.Model):
     # Relationships
     user = db.relationship("User", back_populates="plants")
     plant = db.relationship("Plant", back_populates="user_plants")
-    watering_records = db.relationship("WateringRecord", back_populates="user_plant", cascade="all, delete-orphan")
-    watering_schedule = db.relationship("WateringSchedule", back_populates="user_plant", uselist=False)
+    watering_records = db.relationship(
+        "WateringRecord",
+        back_populates="user_plant",
+        cascade="all, delete-orphan"
+    )
+    watering_schedule = db.relationship(
+        "WateringSchedule",
+        back_populates="user_plant",
+        uselist=False
+    )
 
     def __init__(self, user_id, plant_id, is_outside, planted_date=None):
         self.user_id = user_id
