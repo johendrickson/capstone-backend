@@ -3,7 +3,7 @@ import json
 from google import genai
 
 # Initialize the Gemini client using the GEMINI_API_KEY environment variable
-client = genai.Client()
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def generate_plant_info_from_scientific_name(scientific_name):
     prompt = f"""
