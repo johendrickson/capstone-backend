@@ -2,7 +2,7 @@ name: Weather Alerts Cronjob
 
 on:
   schedule:
-    - cron: "0 17 * * *"  # runs daily at 9am PST
+    - cron: "0 16 * * *"  # runs daily at 9am PST
   workflow_dispatch:      # lets you trigger it manually from GitHub
 
 jobs:

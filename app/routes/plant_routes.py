@@ -1,13 +1,8 @@
-import os
-import json
-from flask import Blueprint, abort, make_response, request, Response
-
-from google import genai
+from flask import Blueprint, request, make_response
 from app.models.plant import Plant
 from app.db import db
 from app.routes.route_utilities import validate_model
-
-
+from app.helpers.gemini import generate_plant_info
 
 bp = Blueprint("plants_bp", __name__, url_prefix="/plants")
 
@@ -27,7 +22,7 @@ def get_plants():
 def create_plant():
     request_body = request.get_json()
 
-    required_fields = ["common_name", "scientific_name"]
+    required_fields = ["common_name"]
     missing_fields = [field for field in required_fields if field not in request_body]
 
     if not request_body or missing_fields:
@@ -36,9 +31,18 @@ def create_plant():
             400
         )
 
+    # Use Gemini helper to fetch data
+    gemini_data = generate_plant_info(request_body["common_name"])
+
+    # Merge gemini_data into request_body if keys are missing
+    for key, value in gemini_data.items():
+        if key not in request_body or not request_body[key]:
+            request_body[key] = value
+
+    # Now create the Plant instance with enriched data
     new_plant = Plant(
         common_name=request_body["common_name"],
-        scientific_name=request_body["scientific_name"],
+        scientific_name=request_body.get("scientific_name"),
         species=request_body.get("species"),
         preferred_soil_conditions=request_body.get("preferred_soil_conditions"),
         propagation_methods=request_body.get("propagation_methods"),

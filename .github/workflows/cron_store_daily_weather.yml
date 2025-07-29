@@ -2,7 +2,7 @@ name: Store Daily Weather Cronjob
 
 on:
   schedule:
-    - cron: "30 16 * * *"  # runs daily at 8:30 AM PST (16:30 UTC)
+    - cron: "30 15 * * *"  # runs daily at 8:30 AM PST (16:30 UTC)
   workflow_dispatch:      # manual trigger
 
 jobs:

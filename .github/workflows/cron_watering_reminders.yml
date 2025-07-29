@@ -2,7 +2,7 @@ name: Watering Reminders Cronjob
 
 on:
   schedule:
-    - cron: "0 17 * * *"  # runs daily at 9am PST
+    - cron: "0 16 * * *"  # runs daily at 9am PST
   workflow_dispatch:
 
 jobs:
