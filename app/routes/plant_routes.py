@@ -1,8 +1,8 @@
-from flask import Blueprint, request, make_response
+from flask import Blueprint, request, make_response, Response
 from app.models.plant import Plant
 from app.db import db
 from app.routes.route_utilities import validate_model
-from app.helpers.gemini import generate_plant_info
+from app.helpers.gemini import generate_plant_info_from_scientific_name, suggest_scientific_name
 
 bp = Blueprint("plants_bp", __name__, url_prefix="/plants")
 
@@ -15,8 +15,7 @@ def get_plant(id):
 def get_plants():
     query = db.select(Plant)
     plants = db.session.scalars(query).all()
-    plants_response = [plant.to_dict() for plant in plants]
-    return {"plants": plants_response}
+    return {"plants": [plant.to_dict() for plant in plants]}
 
 @bp.post("")
 def create_plant():
@@ -31,15 +30,13 @@ def create_plant():
             400
         )
 
-    # Use Gemini helper to fetch data
-    gemini_data = generate_plant_info(request_body["common_name"])
+    # Only enrich with Gemini if scientific_name is present
+    if request_body.get("scientific_name"):
+        gemini_data = generate_plant_info_from_scientific_name(request_body["scientific_name"])
+        for key, value in gemini_data.items():
+            if key not in request_body or not request_body[key]:
+                request_body[key] = value
 
-    # Merge gemini_data into request_body if keys are missing
-    for key, value in gemini_data.items():
-        if key not in request_body or not request_body[key]:
-            request_body[key] = value
-
-    # Now create the Plant instance with enriched data
     new_plant = Plant(
         common_name=request_body["common_name"],
         scientific_name=request_body.get("scientific_name"),
@@ -55,6 +52,16 @@ def create_plant():
 
     return {"plant": new_plant.to_dict()}, 201
 
+@bp.get("/suggest")
+def get_scientific_name_suggestions():
+    partial_name = request.args.get("partial_name")
+
+    if not partial_name:
+        return make_response({"details": "Query param 'partial_name' is required."}, 400)
+
+    suggestions = suggest_scientific_name(partial_name)
+    return {"suggestions": suggestions}
+
 @bp.put("/<int:id>")
 def update_plant(id):
     plant = validate_model(Plant, id)
@@ -63,7 +70,6 @@ def update_plant(id):
     if not request_body:
         return make_response({"details": "Request body is empty."}, 400)
 
-    # Update all fields if provided, else keep existing values
     plant.common_name = request_body.get("common_name", plant.common_name)
     plant.scientific_name = request_body.get("scientific_name", plant.scientific_name)
     plant.species = request_body.get("species", plant.species)
@@ -74,13 +80,11 @@ def update_plant(id):
 
     db.session.commit()
 
-    return Response(status=204, mimetype="application/json")
+    return Response(status=204)
 
 @bp.delete("/<int:id>")
 def delete_plant(id):
     plant = validate_model(Plant, id)
-
     db.session.delete(plant)
     db.session.commit()
-
-    return Response(status=204, mimetype="application/json")
+    return Response(status=204)
