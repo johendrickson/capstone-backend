@@ -29,30 +29,6 @@ def generate_plant_info_from_scientific_name(scientific_name):
     except (json.JSONDecodeError, AttributeError):
         return {}
 
-def generate_plant_info_from_scientific_name(scientific_name):
-    prompt = f"""
-    Provide detailed information about the plant with the scientific name "{scientific_name}".
-    Return the following fields in JSON format:
-    {{
-        "common_name": "string",
-        "species": "string",
-        "preferred_soil_conditions": "string",
-        "propagation_methods": "string",
-        "edible_parts": "string",
-        "is_pet_safe": true
-    }}
-    Only return the JSON object — no extra explanation or formatting.
-    """
-
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
-        )
-        return json.loads(response.text)
-    except (json.JSONDecodeError, AttributeError):
-        return {}
-
 def suggest_scientific_name(partial_name):
     prompt = f"""
     The user typed a partial scientific plant name: "{partial_name}".
