@@ -45,13 +45,16 @@ def suggest_scientific_name(partial_name):
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=[{
-                "role": "user",
-                "parts": [{
-                    "text": prompt,
-                }]
-            }]
+            contents=prompt
+            # [{
+            #     "role": "user",
+            #     "parts": [{
+            #         "text": prompt,
+            #     }]
+            # }]
         )
-        return json.loads(response.text)
-    except (json.JSONDecodeError, AttributeError):
-        return []
+        print("Raw Gemini response:", response.text)  # <-- Add temporarily
+        return json.loads(response.text.strip())
+    except (json.JSONDecodeError, AttributeError) as e:
+        print("Error parsing JSON:", e)
+        return {}
