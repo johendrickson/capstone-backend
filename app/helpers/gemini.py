@@ -4,8 +4,8 @@ from google import genai
 
 # Initialize the Gemini client using the GEMINI_API_KEY environment variable
 client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY"),
-    vertexai=True
+    api_key=os.getenv("GEMINI_API_KEY")
+    # vertexai=True
     # project=os.getenv("GOOGLE_CLOUD_PROJECT"),
     # location=os.getenv("GOOGLE_CLOUD_LOCATION")
 )
