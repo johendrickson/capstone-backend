@@ -38,9 +38,12 @@ def fetch_forecast_data(lat, lon):
     if not api_key:
         raise ValueError("OPENWEATHER_API_KEY environment variable is not set")
 
-    url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&units=imperial&appid={api_key}"
+    url = (
+        "https://api.openweathermap.org/data/2.5/forecast"
+        f"?lat={lat}&lon={lon}&units=imperial&appid={api_key}"
+    )
 
-    response = requests.get(url)
+    response = requests.get(url, timeout=100)
     response.raise_for_status()  # raise error if response bad
     data = response.json()
 
@@ -88,19 +91,22 @@ def get_weather_alerts_for_user(user):
 
     if detect_heat_wave(today_temp, yesterday_temp):
         alerts.append(
-            "Heads up! It's going to be unusually hot today — a heat wave is moving through your area. "
-            "Be sure to check on your sun-sensitive plants and water them early to avoid heat stress."
+            "Heads up! It's going to be unusually hot today — "
+            "a heat wave is moving through your area. "
+            "Be sure to check on your sun-sensitive plants and water them early "
+            "to avoid heat stress."
         )
 
     if detect_cold_snap(today_temp, yesterday_temp):
         alerts.append(
-            "Brrr! ❄️ A cold snap is hitting today. If you have any tropical or frost-sensitive plants outside, "
+            "Brrr! ❄️ A cold snap is hitting today. "
+            "If you have any tropical or frost-sensitive plants outside, "
             "you might want to bring them in or cover them up to keep them cozy."
         )
 
     if detect_frost(today_temp):
         alerts.append(
-            "It’s frosty out there! Temperatures are dipping low enough that frost could form. "
+            "It's frosty out there! Temperatures are dipping low enough that frost could form. "
             "Protect your plants by covering them or moving them indoors if you can."
         )
 

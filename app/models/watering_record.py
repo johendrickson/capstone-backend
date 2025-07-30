@@ -1,5 +1,5 @@
-from app.db import db
 from datetime import datetime
+from app.db import db
 
 class WateringRecord(db.Model):
     __tablename__ = "watering_records"

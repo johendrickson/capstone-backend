@@ -1,7 +1,14 @@
+"""
+This code is part of a Flask application that provides geocoding functionality
+using the LocationIQ API. It includes functions to convert a zip code into
+latitude and longitude coordinates, and to handle errors gracefully by returning
+appropriate HTTP responses.
+"""
+
 import os
+from typing import Union, Tuple
 import requests
 from flask import make_response, Response
-from typing import Union, Tuple
 
 
 def geocode_location(zip_code: str):
@@ -18,7 +25,7 @@ def geocode_location(zip_code: str):
         "limit": 1
     }
 
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=100)
     response.raise_for_status()
 
     data = response.json()

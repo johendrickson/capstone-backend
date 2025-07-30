@@ -73,7 +73,10 @@ def update_plant(id):
     plant.common_name = request_body.get("common_name", plant.common_name)
     plant.scientific_name = request_body.get("scientific_name", plant.scientific_name)
     plant.species = request_body.get("species", plant.species)
-    plant.preferred_soil_conditions = request_body.get("preferred_soil_conditions", plant.preferred_soil_conditions)
+    plant.preferred_soil_conditions = request_body.get(
+        "preferred_soil_conditions",
+        plant.preferred_soil_conditions
+    )
     plant.propagation_methods = request_body.get("propagation_methods", plant.propagation_methods)
     plant.edible_parts = request_body.get("edible_parts", plant.edible_parts)
     plant.is_pet_safe = request_body.get("is_pet_safe", plant.is_pet_safe)

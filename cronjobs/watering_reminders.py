@@ -1,8 +1,8 @@
+from datetime import date
 from app import create_app
 from app.models.user import User
 from app.helpers.email import send_email
 from app.db import db
-from datetime import date
 
 app = create_app()
 

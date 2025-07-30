@@ -1,8 +1,8 @@
 from app import create_app
 from app.models.user import User
 from app.helpers.email import send_email
-from cronjobs.watering_reminders import get_watering_reminders_for_user
 from app.db import db
+from cronjobs.watering_reminders import get_watering_reminders_for_user
 
 app = create_app()
 

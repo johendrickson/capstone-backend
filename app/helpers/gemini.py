@@ -3,12 +3,7 @@ import json
 from google import genai
 
 # Initialize the Gemini client using the GEMINI_API_KEY environment variable
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-    # vertexai=True
-    # project=os.getenv("GOOGLE_CLOUD_PROJECT"),
-    # location=os.getenv("GOOGLE_CLOUD_LOCATION")
-)
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def generate_plant_info_from_scientific_name(scientific_name):
     prompt = f"""
@@ -46,14 +41,8 @@ def suggest_scientific_name(partial_name):
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt
-            # [{
-            #     "role": "user",
-            #     "parts": [{
-            #         "text": prompt,
-            #     }]
-            # }]
         )
-        print("Raw Gemini response:", response.text)  # <-- Add temporarily
+
         return json.loads(response.text.strip()[7:-3].strip())
     except (json.JSONDecodeError, AttributeError) as e:
         print("Error parsing JSON:", e)

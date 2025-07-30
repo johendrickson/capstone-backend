@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db import db
 from app.models.user_plant import UserPlant
 
@@ -12,9 +12,19 @@ class User(db.Model):
     zip_code: Mapped[str] = mapped_column(nullable=False)  # required zip code as string
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
-    plants: Mapped[list["UserPlant"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    plants: Mapped[list["UserPlant"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
-    def __init__(self, name: str, email: str, zip_code: str, latitude: Optional[float] = None, longitude: Optional[float] = None):
+    def __init__(
+        self,
+        name: str,
+        email: str,
+        zip_code: str,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None
+    ):
         self.name = name
         self.email = email
         self.zip_code = zip_code
