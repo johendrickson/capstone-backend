@@ -54,7 +54,7 @@ def suggest_scientific_name(partial_name):
             # }]
         )
         print("Raw Gemini response:", response.text)  # <-- Add temporarily
-        return json.loads(response.text.strip())
+        return json.loads('```'.split(response.text.strip())[1])
     except (json.JSONDecodeError, AttributeError) as e:
         print("Error parsing JSON:", e)
         return {}
