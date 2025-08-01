@@ -66,5 +66,10 @@ def create_app(config=None):
     app.register_blueprint(user_plants_bp)
     app.register_blueprint(plants_bp)
 
-    CORS(app)
+    allowed_origins = [
+        "http://localhost:3000",               # React dev server URL
+        "https://plant-pal-frontend.onrender.com"  # Replace with your actual deployed frontend URL
+    ]
+    CORS(app, resources={r"/*": {"origins": allowed_origins}})
+
     return app
