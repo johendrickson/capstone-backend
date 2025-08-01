@@ -1,13 +1,20 @@
 from app.db import db
 from datetime import datetime
 
+# Association table for many-to-many UserPlant <-> Tag
+userplant_tags = db.Table(
+    "userplant_tags",
+    db.Column("user_plant_id", db.Integer, db.ForeignKey("user_plants.id"), primary_key=True),
+    db.Column("tag_id", db.Integer, db.ForeignKey("tags.id"), primary_key=True)
+)
+
 class UserPlant(db.Model):
     __tablename__ = "user_plants"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     plant_id = db.Column(db.Integer, db.ForeignKey("plants.id"), nullable=False)
-    is_outside = db.Column(db.Boolean, nullable=False)
+    is_outdoor = db.Column(db.Boolean, nullable=False)
     planted_date = db.Column(db.DateTime, nullable=True)
 
     # Relationships
@@ -24,10 +31,17 @@ class UserPlant(db.Model):
         uselist=False
     )
 
-    def __init__(self, user_id, plant_id, is_outside, planted_date=None):
+    # many-to-many tags relationship
+    tags = db.relationship(
+        "Tag",
+        secondary=userplant_tags,
+        back_populates="user_plants"
+    )
+
+    def __init__(self, user_id, plant_id, is_outdoor, planted_date=None):
         self.user_id = user_id
         self.plant_id = plant_id
-        self.is_outside = is_outside
+        self.is_outdoor = is_outdoor
         self.planted_date = planted_date if planted_date else None
 
     def to_dict(self):
@@ -35,6 +49,7 @@ class UserPlant(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "plant_id": self.plant_id,
-            "is_outside": self.is_outside,
+            "is_outdoor": self.is_outdoor,
             "planted_date": self.planted_date.isoformat() if self.planted_date else None,
+            "tags": [tag.to_dict() for tag in self.tags]  # Include tags in serialization
         }

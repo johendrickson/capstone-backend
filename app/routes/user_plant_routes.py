@@ -2,6 +2,7 @@ from flask import Blueprint, request, make_response, Response
 from app.models.user_plant import UserPlant
 from app.models.user import User
 from app.models.plant import Plant
+from app.models.tag import Tag  # Import Tag model
 from app.db import db
 from app.routes.route_utilities import validate_model
 
@@ -11,9 +12,9 @@ bp = Blueprint("user_plants_bp", __name__, url_prefix="/user_plants")
 def create_user_plant():
     data = request.get_json()
 
-    required_fields = ["user_id", "plant_id", "is_outside"]
+    required_fields = ["user_id", "plant_id", "is_outdoor"]
     if not data or not all(field in data for field in required_fields):
-        return make_response({"details": "user_id, plant_id, and is_outside are required."}, 400)
+        return make_response({"details": "user_id, plant_id, and is_outdoor are required."}, 400)
 
     user = validate_model(User, data["user_id"])
     plant = validate_model(Plant, data["plant_id"])
@@ -21,9 +22,15 @@ def create_user_plant():
     user_plant = UserPlant(
         user_id=user.id,
         plant_id=plant.id,
-        is_outside=data["is_outside"],
+        is_outdoor=data["is_outdoor"],
         planted_date=data.get("planted_date")  # optional
     )
+
+    # Handle tags if provided as list of tag IDs
+    tag_ids = data.get("tag_ids", [])
+    if tag_ids:
+        tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+        user_plant.tags = tags
 
     db.session.add(user_plant)
     db.session.commit()
@@ -55,10 +62,16 @@ def update_user_plant(user_plant_id):
     if not data:
         return make_response({"details": "Request body is empty."}, 400)
 
-    if "is_outside" in data:
-        user_plant.is_outside = data["is_outside"]
+    if "is_outdoor" in data:
+        user_plant.is_outdoor = data["is_outdoor"]
     if "planted_date" in data:
         user_plant.planted_date = data["planted_date"]
+
+    # Update tags if provided
+    if "tag_ids" in data:
+        tag_ids = data["tag_ids"]
+        tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+        user_plant.tags = tags
 
     db.session.commit()
     return Response(status=204, mimetype="application/json")
