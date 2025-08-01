@@ -83,3 +83,15 @@ def delete_user(id):
     db.session.commit()
 
     return Response(status=204, mimetype="application/json")
+
+@bp.post("/login")
+def login_user():
+    data = request.get_json()
+    if not data or "email" not in data:
+        return make_response({"details": "Email is required."}, 400)
+
+    user = User.query.filter_by(email=data["email"]).first()
+    if not user:
+        return make_response({"details": "Invalid email or user not found."}, 401)
+
+    return {"user": user.to_dict()}, 200
