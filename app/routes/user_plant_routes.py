@@ -71,7 +71,7 @@ def update_user_plant(user_plant_id):
     if "tag_ids" in data:
         tag_ids = data["tag_ids"]
         tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
-        user_plant.tags = tags
+        user_plant.tags = tags # type: ignore[attr-defined]
 
     db.session.commit()
     return Response(status=204, mimetype="application/json")
