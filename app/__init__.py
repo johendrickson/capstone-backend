@@ -54,17 +54,20 @@ def create_app(config=None):
     from .models.watering_record import WateringRecord
     from .models.watering_schedule import WateringSchedule
     from .models.daily_weather import DailyWeather
+    from .models.tag import Tag
 
     # Import and register blueprints here as well
     print("app importing blueprints/routes")
     from app.routes.user_routes import bp as users_bp
     from app.routes.user_plant_routes import bp as user_plants_bp
     from app.routes.plant_routes import bp as plants_bp
+    from app.routes.tag_routes import bp as tags_bp
 
     print("app registering blueprints")
     app.register_blueprint(users_bp)
     app.register_blueprint(user_plants_bp)
     app.register_blueprint(plants_bp)
+    app.register_blueprint(tags_bp)
 
     allowed_origins = [
         "http://localhost:3000",               # React dev server URL
