@@ -89,3 +89,12 @@ def delete_plant(id):
     db.session.delete(plant)
     db.session.commit()
     return Response(status=204)
+
+@bp.get("/autofill")
+def get_autofill_data():
+    scientific_name = request.args.get("scientific_name")
+    if not scientific_name:
+        return make_response({"details": "Query param 'scientific_name' is required."}, 400)
+
+    gemini_data = generate_plant_info_from_scientific_name(scientific_name)
+    return gemini_data
