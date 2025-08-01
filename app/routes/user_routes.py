@@ -37,8 +37,10 @@ def create_user():
         email=data.get("email"),
         zip_code=data.get("zip_code"),
         latitude=latitude,
-        longitude=longitude
+        longitude=longitude,
+        garden_name=data.get("garden_name", "Your Garden")  # <-- NEW
     )
+
     db.session.add(user)
     db.session.commit()
 
@@ -66,6 +68,9 @@ def update_user(id):
             return coords
         user.latitude, user.longitude = coords
         user.zip_code = new_zip
+
+    if "garden_name" in data:
+        user.garden_name = data["garden_name"]
 
     db.session.commit()
 
