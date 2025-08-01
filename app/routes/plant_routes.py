@@ -21,10 +21,10 @@ def get_plants():
 def create_plant():
     request_body = request.get_json()
 
-    required_fields = ["common_name"]
-    missing_fields = [field for field in required_fields if field not in request_body]
+    required_fields = ["scientific_name"]
+    missing_fields = [field for field in required_fields if field not in request_body or not request_body[field]]
 
-    if not request_body or missing_fields:
+    if missing_fields:
         return make_response(
             {"details": f"Missing required field(s): {', '.join(missing_fields)}"},
             400
@@ -38,13 +38,14 @@ def create_plant():
                 request_body[key] = value
 
     new_plant = Plant(
-        common_name=request_body["common_name"],
-        scientific_name=request_body.get("scientific_name"),
+        scientific_name=request_body["scientific_name"],
+        common_name=request_body.get("common_name"),
         species=request_body.get("species"),
         preferred_soil_conditions=request_body.get("preferred_soil_conditions"),
         propagation_methods=request_body.get("propagation_methods"),
         edible_parts=request_body.get("edible_parts"),
         is_pet_safe=request_body.get("is_pet_safe"),
+        image_url=request_body.get("image_url")
     )
 
     db.session.add(new_plant)
@@ -70,19 +71,16 @@ def update_plant(id):
     if not request_body:
         return make_response({"details": "Request body is empty."}, 400)
 
-    plant.common_name = request_body.get("common_name", plant.common_name)
     plant.scientific_name = request_body.get("scientific_name", plant.scientific_name)
+    plant.common_name = request_body.get("common_name", plant.common_name)
     plant.species = request_body.get("species", plant.species)
-    plant.preferred_soil_conditions = request_body.get(
-        "preferred_soil_conditions",
-        plant.preferred_soil_conditions
-    )
+    plant.preferred_soil_conditions = request_body.get("preferred_soil_conditions", plant.preferred_soil_conditions)
     plant.propagation_methods = request_body.get("propagation_methods", plant.propagation_methods)
     plant.edible_parts = request_body.get("edible_parts", plant.edible_parts)
     plant.is_pet_safe = request_body.get("is_pet_safe", plant.is_pet_safe)
+    plant.image_url = request_body.get("image_url", plant.image_url)
 
     db.session.commit()
-
     return Response(status=204)
 
 @bp.delete("/<int:id>")
