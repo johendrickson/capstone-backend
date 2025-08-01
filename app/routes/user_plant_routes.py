@@ -12,16 +12,29 @@ bp = Blueprint("user_plants_bp", __name__, url_prefix="/user_plants")
 def create_user_plant():
     data = request.get_json()
 
-    required_fields = ["user_id", "plant_id", "is_outdoor"]
+    required_fields = ["user_id", "is_outdoor"]
     if not data or not all(field in data for field in required_fields):
-        return make_response({"details": "user_id, plant_id, and is_outdoor are required."}, 400)
+        return make_response({"details": "user_id and is_outdoor are required."}, 400)
+
+    new_plant = Plant(
+        scientific_name=data["scientific_name"],
+        common_name=data.get("common_name"),
+        species=data.get("species"),
+        preferred_soil_conditions=data.get("preferred_soil_conditions"),
+        propagation_methods=data.get("propagation_methods"),
+        edible_parts=data.get("edible_parts"),
+        is_pet_safe=data.get("is_pet_safe"),
+        image_url=data.get("image_url")
+    )
+
+    db.session.add(new_plant)
+    db.session.commit()
 
     user = validate_model(User, data["user_id"])
-    plant = validate_model(Plant, data["plant_id"])
 
     user_plant = UserPlant(
         user_id=user.id,
-        plant_id=plant.id,
+        plant_id=new_plant.id,
         is_outdoor=data["is_outdoor"],
         planted_date=data.get("planted_date")  # optional
     )
