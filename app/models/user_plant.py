@@ -51,5 +51,6 @@ class UserPlant(db.Model):
             "plant_id": self.plant_id,
             "is_outdoor": self.is_outdoor,
             "planted_date": self.planted_date.isoformat() if self.planted_date else None,
-            "tags": [tag.to_dict() for tag in self.tags]  # Include tags in serialization
+            "tags": [tag.to_dict() for tag in self.tags],
+            "plant": self.plant.to_dict() if self.plant else None
         }
