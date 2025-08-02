@@ -73,7 +73,8 @@ def get_weather_alerts_for_user(user):
     from app.db import db
     from datetime import date, timedelta
 
-    lat, lon = geocode_location(user.zip_code)
+    lat = user.latitude
+    lon = user.longitude
     forecast = fetch_forecast_data(lat, lon)
 
     today = date.today()
