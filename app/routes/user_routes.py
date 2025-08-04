@@ -46,35 +46,38 @@ def create_user():
 
     return {"user": user.to_dict()}, 201
 
-@bp.put("/<int:id>")
+@bp.patch("/<int:id>")
 def update_user(id):
     user = validate_model(User, id)
     data = request.get_json()
     if not data:
         return make_response({"details": "Request body is empty."}, 400)
 
-    new_email = data.get("email")
-    if new_email and new_email != user.email:
-        if User.query.filter_by(email=new_email).first():
-            return make_response({"details": "Email already exists."}, 409)
+    if "email" in data:
+        new_email = data["email"]
+        if new_email != user.email:
+            if User.query.filter_by(email=new_email).first():
+                return make_response({"details": "Email already exists."}, 409)
+            user.email = new_email
 
-    user.name = data.get("name", user.name)
-    user.email = new_email or user.email
+    if "name" in data:
+        user.name = data["name"]
 
-    new_zip = data.get("zip_code")
-    if new_zip and new_zip != user.zip_code:
-        coords = get_coordinates_or_error(new_zip)
-        if isinstance(coords, Response):
-            return coords
-        user.latitude, user.longitude = coords
-        user.zip_code = new_zip
+    if "zip_code" in data:
+        new_zip = data["zip_code"]
+        if new_zip != user.zip_code:
+            coords = get_coordinates_or_error(new_zip)
+            if isinstance(coords, Response):
+                return coords
+            user.latitude, user.longitude = coords
+            user.zip_code = new_zip
 
     if "garden_name" in data:
         user.garden_name = data["garden_name"]
 
     db.session.commit()
-
     return {"user": user.to_dict()}, 200
+
 
 @bp.delete("/<int:id>")
 def delete_user(id):
