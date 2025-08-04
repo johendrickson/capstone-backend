@@ -46,14 +46,9 @@ def geocode_location(zip_code: str):
     lon = float(data[0]["lon"])
     return lat, lon
 
-
-def get_coordinates_or_error(zip_code) -> Union[Tuple[float, float], Response]:
-    """
-    Wrapper that attempts to get coordinates from a zip code.
-    Returns a (lat, lon) tuple on success,
-    or a Flask Response (error JSON + status 400) on failure.
-    """
+def get_coordinates_or_error(zip_code):
     try:
-        return geocode_location(zip_code)
+        lat, lon = geocode_location(zip_code)
+        return (lat, lon)
     except Exception as e:
         return make_response({"details": f"Invalid zip_code: {str(e)}"}, 400)
