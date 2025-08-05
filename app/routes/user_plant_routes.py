@@ -2,7 +2,7 @@ from flask import Blueprint, request, make_response, Response
 from app.models.user_plant import UserPlant
 from app.models.user import User
 from app.models.plant import Plant
-from app.models.tag import Tag  # Import Tag model
+from app.models.tag import Tag
 from app.db import db
 from app.routes.route_utilities import validate_model
 
@@ -36,10 +36,9 @@ def create_user_plant():
         user_id=user.id,
         plant_id=new_plant.id,
         is_outdoor=data["is_outdoor"],
-        planted_date=data.get("planted_date")  # optional
+        planted_date=data.get("planted_date")
     )
 
-    # Handle tags if provided as list of tag IDs
     tag_ids = data.get("tag_ids", [])
     if tag_ids:
         tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
@@ -84,7 +83,27 @@ def update_user_plant(user_plant_id):
     if "tag_ids" in data:
         tag_ids = data["tag_ids"]
         tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
-        user_plant.tags = tags # type: ignore[attr-defined]
+        user_plant.tags = tags
+
+    # Update associated Plant fields
+    plant = user_plant.plant
+
+    if "scientific_name" in data:
+        plant.scientific_name = data["scientific_name"]
+    if "common_name" in data:
+        plant.common_name = data["common_name"]
+    if "species" in data:
+        plant.species = data["species"]
+    if "preferred_soil_conditions" in data:
+        plant.preferred_soil_conditions = data["preferred_soil_conditions"]
+    if "propagation_methods" in data:
+        plant.propagation_methods = data["propagation_methods"]
+    if "edible_parts" in data:
+        plant.edible_parts = data["edible_parts"]
+    if "is_pet_safe" in data:
+        plant.is_pet_safe = data["is_pet_safe"]
+    if "image_url" in data:
+        plant.image_url = data["image_url"]
 
     db.session.commit()
     return Response(status=204, mimetype="application/json")
