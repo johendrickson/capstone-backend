@@ -86,7 +86,7 @@ def get_weather_alerts_for_user(user):
         date=yesterday
     ).first()
     today_temp = forecast["today"]["temp"]
-    yesterday_temp = yesterday_data.high if yesterday_data else None
+    yesterday_temp = yesterday_data.max_temp if yesterday_data else None
 
     alerts = []
 
