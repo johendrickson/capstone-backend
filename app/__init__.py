@@ -65,6 +65,9 @@ def create_app(config=None):
     from app.routes.weather_routes import bp as weather_bp
     from app.routes.geocode_routes import bp as geocode_bp
     from app.routes.gemini_routes import bp as gemini_bp
+    from app.routes.watering_record_routes import bp as watering_records_bp
+    from app.routes.watering_reminders_routes import bp as watering_schedules_bp
+
 
     print("app registering blueprints")
     app.register_blueprint(users_bp)
@@ -74,6 +77,8 @@ def create_app(config=None):
     app.register_blueprint(weather_bp)
     app.register_blueprint(geocode_bp)
     app.register_blueprint(gemini_bp)
+    app.register_blueprint(watering_records_bp)
+    app.register_blueprint(watering_schedules_bp)
 
     allowed_origins = [
         "http://localhost:3000",               # React dev server URL
