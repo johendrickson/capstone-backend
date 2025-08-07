@@ -3,7 +3,9 @@ import json
 from google import genai
 
 # Initialize the Gemini client using the GEMINI_API_KEY environment variable
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 def generate_plant_info_from_scientific_name(scientific_name):
     prompt = f"""
@@ -21,12 +23,14 @@ def generate_plant_info_from_scientific_name(scientific_name):
     """
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[{"role": "user", "parts": [prompt]}]
-        )
-        return json.loads(response.text)
-    except (json.JSONDecodeError, AttributeError):
+        response = model.generate_content(prompt)
+        if hasattr(response, "text"):
+            return json.loads(response.text)
+        else:
+            print("Gemini response has no text:", response)
+            return {}
+    except (json.JSONDecodeError, AttributeError) as e:
+        print("Error parsing Gemini JSON:", e)
         return {}
 
 def suggest_scientific_name(partial_name):
@@ -38,12 +42,12 @@ def suggest_scientific_name(partial_name):
     """
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
-        )
-
-        return json.loads(response.text.strip()[7:-3].strip())
+        response = model.generate_content(prompt)
+        if hasattr(response, "text"):
+            return json.loads(response.text)
+        else:
+            print("Gemini suggestion response has no text:", response)
+            return []
     except (json.JSONDecodeError, AttributeError) as e:
-        print("Error parsing JSON:", e)
-        return {}
+        print("Error parsing Gemini suggestion JSON:", e)
+        return []
