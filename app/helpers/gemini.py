@@ -1,14 +1,14 @@
 import os
 import json
-from google.generativeai import GenerativeModel
-from google.generativeai.types import Content
 import google.generativeai as genai
+from google.generativeai.generative_models
 
-# Configure API key correctly
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# Set up configuration using the default client (no call to genai.configure)
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    raise EnvironmentError("GEMINI_API_KEY environment variable is not set.")
 
-# Use the model
-model = GenerativeModel("gemini-1.5-flash")
+model = GenerativeModel("gemini-2.5-flash", api_key=api_key)
 
 def generate_plant_info_from_scientific_name(scientific_name):
     prompt = f"""
