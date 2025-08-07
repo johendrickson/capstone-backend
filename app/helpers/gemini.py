@@ -1,17 +1,9 @@
 import os
 import json
 import google.generativeai as genai
-from google.generativeai import GenerativeModel
 
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    raise EnvironmentError("GEMINI_API_KEY environment variable is not set.")
-
-# Set API key globally on the genai client
-genai.set_api_key(api_key)
-
-# Create model instance (no api_key param here)
-model = GenerativeModel(model_name="gemini-2.5-flash")
+# Initialize the Gemini client using the GEMINI_API_KEY environment variable
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def generate_plant_info_from_scientific_name(scientific_name):
     prompt = f"""
@@ -29,10 +21,12 @@ def generate_plant_info_from_scientific_name(scientific_name):
     """
 
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[{"role": "user", "parts": [prompt]}]
+        )
         return json.loads(response.text)
-    except Exception as e:
-        print("Error parsing Gemini JSON:", e)
+    except (json.JSONDecodeError, AttributeError):
         return {}
 
 def suggest_scientific_name(partial_name):
@@ -44,8 +38,12 @@ def suggest_scientific_name(partial_name):
     """
 
     try:
-        response = model.generate_content(prompt)
-        return json.loads(response.text)
-    except Exception as e:
-        print("Error parsing suggestions JSON:", e)
-        return []
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+
+        return json.loads(response.text.strip()[7:-3].strip())
+    except (json.JSONDecodeError, AttributeError) as e:
+        print("Error parsing JSON:", e)
+        return {}
