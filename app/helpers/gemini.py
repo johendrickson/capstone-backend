@@ -44,7 +44,7 @@ def suggest_scientific_name(partial_name):
 
     try:
         response = model.generate_content(
-            contents=[{"role": "user", "content": prompt}]        )
+            contents=[{"role": "user", "content": prompt}]
         )
         return json.loads(response.text)
     except (json.JSONDecodeError, AttributeError) as e:
