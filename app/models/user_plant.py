@@ -52,5 +52,12 @@ class UserPlant(db.Model):
             "is_outdoor": self.is_outdoor,
             "planted_date": self.planted_date.isoformat() if self.planted_date else None,
             "tags": [tag.to_dict() for tag in self.tags],
-            "plant": self.plant.to_dict() if self.plant else None
+            "plant": self.plant.to_dict() if self.plant else None,
+            "watering_schedule": {
+                "id": self.watering_schedule.id,
+                "frequency_days": self.watering_schedule.frequency_days,
+                "last_watered": self.watering_schedule.last_watered.isoformat() if self.watering_schedule.last_watered else None
+            } if self.watering_schedule else None,
+            "watering_records": [record.to_dict() for record in self.watering_records] if self.watering_records else []
         }
+

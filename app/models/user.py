@@ -14,6 +14,7 @@ class User(db.Model):
 
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
+    watering_reminders_enabled: Mapped[Optional[bool]] = mapped_column(nullable=True, default=True)
 
     plants: Mapped[list["UserPlant"]] = relationship(
         back_populates="user",
@@ -27,7 +28,8 @@ class User(db.Model):
         zip_code: str,
         garden_name: Optional[str] = "Your Garden",
         latitude: Optional[float] = None,
-        longitude: Optional[float] = None
+        longitude: Optional[float] = None,
+        watering_reminders_enabled: bool = True
     ):
         self.name = name
         self.email = email
@@ -35,6 +37,7 @@ class User(db.Model):
         self.garden_name = garden_name or "Your Garden"
         self.latitude = latitude
         self.longitude = longitude
+        self.watering_reminders_enabled = watering_reminders_enabled
 
     def to_dict(self):
         return {
@@ -45,6 +48,7 @@ class User(db.Model):
             "garden_name": self.garden_name,
             "latitude": self.latitude,
             "longitude": self.longitude,
+            "watering_reminders_enabled": self.watering_reminders_enabled,
         }
 
     @classmethod
@@ -56,4 +60,5 @@ class User(db.Model):
             garden_name=data.get("garden_name", "Your Garden"),
             latitude=data.get("latitude"),
             longitude=data.get("longitude"),
+            watering_reminders_enabled=data.get("watering_reminders_enabled", True)
         )

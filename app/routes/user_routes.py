@@ -38,7 +38,8 @@ def create_user():
         zip_code=data.get("zip_code"),
         latitude=latitude,
         longitude=longitude,
-        garden_name=data.get("garden_name", "Your Garden")  # <-- NEW
+        garden_name=data.get("garden_name", "Your Garden"),
+        watering_reminders_enabled=data.get("watering_reminders_enabled", True)
     )
 
     db.session.add(user)
@@ -75,9 +76,11 @@ def update_user(id):
     if "garden_name" in data:
         user.garden_name = data["garden_name"]
 
+    if "watering_reminders_enabled" in data:
+        user.watering_reminders_enabled = data["watering_reminders_enabled"]
+
     db.session.commit()
     return {"user": user.to_dict()}, 200
-
 
 @bp.delete("/<int:id>")
 def delete_user(id):

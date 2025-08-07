@@ -10,6 +10,9 @@ with app.app_context():
     users = User.query.all()
 
     for user in users:
+        if not user.watering_reminders_enabled:
+            continue
+
         reminders = get_watering_reminders_for_user(user)
 
         if reminders:
