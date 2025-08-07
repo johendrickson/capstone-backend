@@ -43,10 +43,8 @@ def suggest_scientific_name(partial_name):
     """
 
     try:
-        response = model.generate_content(
-            contents=[{"role": "user", "content": prompt}]
-        )
+        response = model.generate_content(prompt)
         return json.loads(response.text)
-    except (json.JSONDecodeError, AttributeError) as e:
-        print("Error parsing JSON:", e)
+    except Exception as e:
+        print(f"Error during Gemini generation: {e}")
         return {}
