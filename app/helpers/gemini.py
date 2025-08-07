@@ -1,9 +1,14 @@
 import os
 import json
 import google.generativeai as genai
+from google.generativeai import GenerativeModel
+
+genai.api_key = os.getenv("GEMINI_API_KEY")
+model = GenerativeModel(
+    model_name="gemini-2.5-flash")
 
 # Initialize the Gemini client using the GEMINI_API_KEY environment variable
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+# client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def generate_plant_info_from_scientific_name(scientific_name):
     prompt = f"""
@@ -21,12 +26,12 @@ def generate_plant_info_from_scientific_name(scientific_name):
     """
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
+        response = model.generate_content(
             contents=[{"role": "user", "parts": [prompt]}]
         )
         return json.loads(response.text)
-    except (json.JSONDecodeError, AttributeError):
+    except (json.JSONDecodeError, AttributeError) as e:
+        print("Error parsing JSON:", e)
         return {}
 
 def suggest_scientific_name(partial_name):
@@ -38,12 +43,10 @@ def suggest_scientific_name(partial_name):
     """
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
+        response = model.generate_content(
+            contents=[{"role": "user", "content": prompt}]        )
         )
-
-        return json.loads(response.text.strip()[7:-3].strip())
+        return json.loads(response.text)
     except (json.JSONDecodeError, AttributeError) as e:
         print("Error parsing JSON:", e)
         return {}
