@@ -84,6 +84,9 @@ def create_app(config=None):
         "http://localhost:3000",               # React dev server URL
         "https://plant-pal-frontend.onrender.com"  # Replace with your actual deployed frontend URL
     ]
-    CORS(app, resources={r"/*": {"origins": allowed_origins}})
+    CORS(
+        app,
+        # resources={r"/*": {"origins": allowed_origins}}
+    )
 
     return app
