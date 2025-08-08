@@ -1,6 +1,7 @@
 from flask import Blueprint, request, make_response, Response
 from app.models.watering_schedule import WateringSchedule
 from app.routes.route_utilities import validate_model
+from app.models.user_plant import UserPlant
 from app.db import db
 
 bp = Blueprint("watering_schedules_bp", __name__, url_prefix="/watering_schedules")
@@ -63,3 +64,28 @@ def delete_watering_schedule(schedule_id):
     db.session.commit()
 
     return Response(status=204)
+
+@bp.get("")
+def get_all_watering_schedules():
+    user_id = request.args.get("user_id")
+    if not user_id:
+        return make_response({"details": "user_id query parameter is required."}, 400)
+
+    schedules = (
+        db.session.query(WateringSchedule)
+        .join(WateringSchedule.user_plant)
+        .filter_by(UserPlant.user_id == user_id)
+        .all()
+    )
+
+    return {
+        "watering_schedules": [
+            {
+                "id": s.id,
+                "user_plant_id": s.user_plant_id,
+                "frequency_days": s.frequency_days,
+                "last_watered": s.last_watered.isoformat() if s.last_watered else None
+            }
+            for s in schedules
+        ]
+    }
