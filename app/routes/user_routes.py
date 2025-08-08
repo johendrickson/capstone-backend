@@ -79,6 +79,9 @@ def update_user(id):
     if "watering_reminders_enabled" in data:
         user.watering_reminders_enabled = data["watering_reminders_enabled"]
 
+    if "weather_alerts_enabled" in data:
+        user.weather_alerts_enabled = data["weather_alerts_enabled"]
+
     db.session.commit()
     return {"user": user.to_dict()}, 200
 
