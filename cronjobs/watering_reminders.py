@@ -23,11 +23,12 @@ def get_watering_reminders_for_user(user):
             user_plant.watering_records and
             max((record.date for record in user_plant.watering_records), default=None)
         )
+        plant_name = user_plant.plant.common_name or user_plant.plant.scientific_name
 
         if not last_record:
-            reminders.append(user_plant.plant.name)
+            reminders.append(plant_name)
         elif (today - last_record).days >= schedule.water_every_days:
-            reminders.append(user_plant.plant.name)
+            reminders.append(plant_name)
 
     return reminders
 
