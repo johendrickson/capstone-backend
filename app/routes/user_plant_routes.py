@@ -50,7 +50,7 @@ def create_user_plant():
     return {"user_plant": user_plant.to_dict()}, 201
 
 @bp.get("/all/<int:user_id>")
-def get_all_user_plants():
+def get_all_user_plants(user_id):
     user_id = request.args.get("user_id")
 
     if user_id:
