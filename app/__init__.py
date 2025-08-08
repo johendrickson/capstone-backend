@@ -66,7 +66,7 @@ def create_app(config=None):
     from app.routes.geocode_routes import bp as geocode_bp
     from app.routes.gemini_routes import bp as gemini_bp
     from app.routes.watering_record_routes import bp as watering_records_bp
-    from app.routes.watering_reminders_routes import bp as watering_schedules_bp
+    from app.routes.watering_schedule_routes import bp as watering_schedules_bp
 
 
     print("app registering blueprints")
