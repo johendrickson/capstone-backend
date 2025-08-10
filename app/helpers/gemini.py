@@ -1,3 +1,4 @@
+import re
 import os
 import json
 import google.generativeai as genai
@@ -6,9 +7,6 @@ from google.generativeai import GenerativeModel
 genai.api_key = os.getenv("GEMINI_API_KEY")
 model = GenerativeModel(
     model_name="gemini-2.5-flash")
-
-# Initialize the Gemini client using the GEMINI_API_KEY environment variable
-# client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def generate_plant_info_from_scientific_name(scientific_name):
     prompt = f"""
@@ -26,9 +24,7 @@ def generate_plant_info_from_scientific_name(scientific_name):
     """
 
     try:
-        response = model.generate_content(
-            contents=[{"role": "user", "parts": [prompt]}]
-        )
+        response = model.generate_content(prompt)
         return json.loads(response.text)
     except (json.JSONDecodeError, AttributeError) as e:
         print("Error parsing JSON:", e)
@@ -44,7 +40,15 @@ def suggest_scientific_name(partial_name):
 
     try:
         response = model.generate_content(prompt)
-        return json.loads(response.text)
+        print("Raw Gemini response:", response.text)
+        # Extract JSON array from text to avoid parsing errors
+        match = re.search(r'\[.*\]', response.text, re.DOTALL)
+        if not match:
+            print("No JSON array found in response")
+            return []
+        json_str = match.group(0)
+        return json.loads(json_str)
+
     except Exception as e:
         print(f"Error during Gemini generation: {e}")
         return []
