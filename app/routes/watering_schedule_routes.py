@@ -42,7 +42,7 @@ def update_watering_schedule(schedule_id):
         schedule.last_watered = data["last_watered"]
 
     db.session.commit()
-    return {"watering_schedule": schedule.to_dict()}, 200
+    return Response(status=204)
 
 @bp.get("/<int:schedule_id>")
 def get_watering_schedule(schedule_id):
