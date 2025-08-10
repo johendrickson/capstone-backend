@@ -25,10 +25,17 @@ def generate_plant_info_from_scientific_name(scientific_name):
 
     try:
         response = model.generate_content(prompt)
-        return json.loads(response.text)
-    except (json.JSONDecodeError, AttributeError) as e:
+        text = response.text
+        # Extract JSON object substring (first {...} block)
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if not match:
+            print("No JSON object found in Gemini response")
+            return {}
+        json_str = match.group(0)
+        return json.loads(json_str)
+    except Exception as e:
         print("Error parsing JSON:", e)
-        return []
+        return {}
 
 def suggest_scientific_name(partial_name):
     prompt = f"""
