@@ -32,7 +32,7 @@ def generate_plant_info_from_scientific_name(scientific_name):
         return json.loads(response.text)
     except (json.JSONDecodeError, AttributeError) as e:
         print("Error parsing JSON:", e)
-        return {}
+        return []
 
 def suggest_scientific_name(partial_name):
     prompt = f"""
@@ -47,4 +47,4 @@ def suggest_scientific_name(partial_name):
         return json.loads(response.text)
     except Exception as e:
         print(f"Error during Gemini generation: {e}")
-        return {}
+        return []
