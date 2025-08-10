@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from app import create_app
 from app.models.user import User
 from app.helpers.email import send_email
@@ -12,7 +12,7 @@ def get_watering_reminders_for_user(user):
     Only include plants that have a watering schedule.
     """
     reminders = []
-    today = date.today()
+    today = datetime.today()
 
     for user_plant in user.plants:
         schedule = user_plant.watering_schedule
@@ -23,12 +23,16 @@ def get_watering_reminders_for_user(user):
             user_plant.watering_records and
             max((record.watered_at for record in user_plant.watering_records), default=None)
         )
-        plant_name = user_plant.plant.common_name or user_plant.plant.scientific_name
 
         if not last_record:
-            reminders.append(plant_name)
-        elif (today - last_record).days >= schedule.water_every_days:
-            reminders.append(plant_name)
+            print(f'last_record was None for {user_plant.plant.scientific_name} (ID: {user_plant.id})')
+        else:
+            plant_name = user_plant.plant.common_name or user_plant.plant.scientific_name
+
+            if not last_record:
+                reminders.append(plant_name)
+            elif (today - last_record).days >= schedule.water_every_days:
+                reminders.append(plant_name)
 
     return reminders
 
@@ -46,8 +50,8 @@ def run_watering_reminders_for_all_users():
                 subject = "Watering Reminder 💧"
                 body = (
                     f"Hey, there!\n\n"
-                    f"Looks like these guys need watered today: {plant_list}\n\n"
-                    "Don't forget to give them some sug'!"
+                    f"Looks like these guys need watered today: {plant_list}.\n\n"
+                    f"Don't forget to give them some sug'!"
                 )
                 send_email(
                     to_email=user.email,
