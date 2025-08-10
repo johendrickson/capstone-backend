@@ -31,7 +31,7 @@ def get_watering_reminders_for_user(user):
 
             if not last_record:
                 reminders.append(plant_name)
-            elif (today - last_record).days >= schedule.water_every_days:
+            elif (today - last_record).days >= schedule.frequency_days:
                 reminders.append(plant_name)
 
     return reminders
