@@ -21,7 +21,7 @@ def get_watering_reminders_for_user(user):
 
         last_record = (
             user_plant.watering_records and
-            max((record.date for record in user_plant.watering_records), default=None)
+            max((record.watered_at for record in user_plant.watering_records), default=None)
         )
         plant_name = user_plant.plant.common_name or user_plant.plant.scientific_name
 
