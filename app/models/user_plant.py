@@ -28,7 +28,8 @@ class UserPlant(db.Model):
     watering_schedule = db.relationship(
         "WateringSchedule",
         back_populates="user_plant",
-        uselist=False
+        uselist=False,
+        cascade='all, delete'
     )
 
     # many-to-many tags relationship
