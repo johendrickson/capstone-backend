@@ -81,6 +81,7 @@ LOCATIONIQ_API_KEY=your_locationiq_api_key
 ```bash
   pip install -r requirements.txt
 ```
+
 4. Set Up Environment Variables
 
     Create a .env file in the project root.
