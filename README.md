@@ -4,7 +4,7 @@ This is the backend service for **Plant Pal**, my Ada Developers Academy capston
 
 It handles plant data management, AI integration, user accounts, weather alerts, and email reminders.
 
-- **Main Capstone Repository:** [Plant Pal Main - Project Scope + Information](https://github.com/johendrickson/capstone)
+- **Main Capstone Repository:** [Plant Pal Main – Project Scope + Information](https://github.com/johendrickson/capstone)
 - **Frontend Repository:** [Plant Pal Frontend – React + TypeScript interface](https://github.com/johendrickson/capstone-frontend)
 
 ---
