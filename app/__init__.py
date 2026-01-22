@@ -17,27 +17,21 @@ DATABASE_URL = (
     "?sslmode=require"
 )
 
-print(DATABASE_URL)
-print("app __init__ file read")
-
 def create_app(config=None):
     print("app inside create_app")
     app = Flask(__name__)
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-    # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 
-    print("app creating engine")
     engine = create_engine(DATABASE_URL)
-    print("app created engine")
 
     try:
-        with engine.connect() as connection:
+        with engine.connect():
             print("Connection successful!")
     except Exception as e:
-        print(f"Failed to connect: {e}\n\n\n")
-        raise Exception(f"Database connection failed: {e}")
+        print(f"Failed to connect: {type(e).__name__}")
+        raise Exception(f"Database connection failed")
 
     if config:
         app.config.update(config)
